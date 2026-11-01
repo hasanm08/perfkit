@@ -1,0 +1,263 @@
+import 'package:flutter/widgets.dart';
+
+import '../../../core/diagnostics/frame_timing_monitor.dart';
+import '../../../core/diagnostics/rebuild_counter.dart';
+import '../../../core/models/lab_scenario.dart';
+import '../../../core/widgets/lab_demo_controller.dart';
+import '../examples/broken/excessive_images_broken.dart';
+import '../examples/broken/expensive_build_broken.dart';
+import '../examples/broken/expensive_paint_broken.dart';
+import '../examples/broken/poor_lists_broken.dart';
+import '../examples/broken/unnecessary_rebuilds_broken.dart';
+import '../examples/fixed/excessive_images_fixed.dart';
+import '../examples/fixed/expensive_build_fixed.dart';
+import '../examples/fixed/expensive_paint_fixed.dart';
+import '../examples/fixed/poor_lists_fixed.dart';
+import '../examples/fixed/unnecessary_rebuilds_fixed.dart';
+
+typedef PerformanceControls = ({
+  ValueNotifier<int> datasetSize,
+  ValueNotifier<int> imageResolution,
+  RebuildCounter rebuildCounter,
+  FrameTimingMonitor frameMonitor,
+});
+
+List<LabScenario> buildPerformanceScenarios(PerformanceControls controls) {
+  return [
+    _RebuildScenario(controls),
+    _ExpensiveBuildScenario(controls),
+    _ListsScenario(controls),
+    _ImagesScenario(controls),
+    _PaintScenario(controls),
+  ];
+}
+
+class _RebuildScenario extends LabScenario {
+  _RebuildScenario(this.controls);
+  final PerformanceControls controls;
+
+  @override
+  String get id => 'perf-rebuilds';
+  @override
+  String get title => '1. Unnecessary Widget Rebuilds';
+  @override
+  String get problemSummary =>
+      'A high-frequency ticker calls setState at the top of a large tree, '
+      'forcing unrelated expensive widgets to rebuild every tick.';
+  @override
+  String get diagnosis =>
+      'Look for rebuild counters climbing on static panels. In DevTools '
+      'Performance, enable track widget rebuilds and watch the heavy subtree.';
+  @override
+  String get recommendedFix =>
+      'Localize state (ValueNotifier + ValueListenableBuilder), extract const '
+      'widgets, and avoid coupling unrelated UI to hot state.';
+  @override
+  String get brokenSourcePath =>
+      'lib/features/performance_lab/examples/broken/unnecessary_rebuilds_broken.dart';
+  @override
+  String get fixedSourcePath =>
+      'lib/features/performance_lab/examples/fixed/unnecessary_rebuilds_fixed.dart';
+
+  @override
+  Widget buildDemo({
+    required bool useFixed,
+    required LabDemoController controller,
+  }) {
+    controls.rebuildCounter.reset();
+    if (useFixed) {
+      return UnnecessaryRebuildsFixed(
+        controller: controller,
+        rebuildCounter: controls.rebuildCounter,
+      );
+    }
+    return UnnecessaryRebuildsBroken(
+      controller: controller,
+      rebuildCounter: controls.rebuildCounter,
+    );
+  }
+}
+
+class _ExpensiveBuildScenario extends LabScenario {
+  _ExpensiveBuildScenario(this.controls);
+  final PerformanceControls controls;
+
+  @override
+  String get id => 'perf-expensive-build';
+  @override
+  String get title => '2. Expensive Build Methods';
+  @override
+  String get problemSummary =>
+      'Large sorting/filtering runs synchronously inside build() whenever '
+      'the parent rebuilds.';
+  @override
+  String get diagnosis =>
+      'Compare the build() compute stopwatch between Broken and Fixed. '
+      'In DevTools, look for long UI-thread work correlated with rebuilds.';
+  @override
+  String get recommendedFix =>
+      'Cache derived data when inputs change; use compute()/isolates for '
+      'genuinely heavy CPU work. Keep build() declarative.';
+  @override
+  String get brokenSourcePath =>
+      'lib/features/performance_lab/examples/broken/expensive_build_broken.dart';
+  @override
+  String get fixedSourcePath =>
+      'lib/features/performance_lab/examples/fixed/expensive_build_fixed.dart';
+
+  @override
+  Widget buildDemo({
+    required bool useFixed,
+    required LabDemoController controller,
+  }) {
+    return ValueListenableBuilder<int>(
+      valueListenable: controls.datasetSize,
+      builder: (_, size, _) {
+        if (useFixed) {
+          return ExpensiveBuildFixed(controller: controller, datasetSize: size);
+        }
+        return ExpensiveBuildBroken(controller: controller, datasetSize: size);
+      },
+    );
+  }
+}
+
+class _ListsScenario extends LabScenario {
+  _ListsScenario(this.controls);
+  final PerformanceControls controls;
+
+  @override
+  String get id => 'perf-lists';
+  @override
+  String get title => '3. Poor List Rendering';
+  @override
+  String get problemSummary =>
+      'Thousands of list rows are constructed eagerly in a Column inside '
+      'SingleChildScrollView.';
+  @override
+  String get diagnosis =>
+      'Eager build stopwatch grows with N. Fixed ListView.builder only '
+      'invokes builders for visible rows.';
+  @override
+  String get recommendedFix =>
+      'Use ListView.builder/slivers, stable keys, itemExtent when valid, '
+      'and keep item builders cheap.';
+  @override
+  String get brokenSourcePath =>
+      'lib/features/performance_lab/examples/broken/poor_lists_broken.dart';
+  @override
+  String get fixedSourcePath =>
+      'lib/features/performance_lab/examples/fixed/poor_lists_fixed.dart';
+
+  @override
+  Widget buildDemo({
+    required bool useFixed,
+    required LabDemoController controller,
+  }) {
+    return ValueListenableBuilder<int>(
+      valueListenable: controls.datasetSize,
+      builder: (_, size, _) {
+        if (useFixed) {
+          return PoorListsFixed(controller: controller, datasetSize: size);
+        }
+        return PoorListsBroken(controller: controller, datasetSize: size);
+      },
+    );
+  }
+}
+
+class _ImagesScenario extends LabScenario {
+  _ImagesScenario(this.controls);
+  final PerformanceControls controls;
+
+  @override
+  String get id => 'perf-images';
+  @override
+  String get title => '4. Excessive Image Decoding';
+  @override
+  String get problemSummary =>
+      'Full-resolution images are decoded into tiny gallery tiles without '
+      'cacheWidth/cacheHeight.';
+  @override
+  String get diagnosis =>
+      'Compare decode target size. Use DevTools Memory to observe image '
+      'cache pressure when scrolling galleries.';
+  @override
+  String get recommendedFix =>
+      'Size assets appropriately; pass cacheWidth/cacheHeight; use '
+      'thumbnails in lists.';
+  @override
+  String get brokenSourcePath =>
+      'lib/features/performance_lab/examples/broken/excessive_images_broken.dart';
+  @override
+  String get fixedSourcePath =>
+      'lib/features/performance_lab/examples/fixed/excessive_images_fixed.dart';
+
+  @override
+  Widget buildDemo({
+    required bool useFixed,
+    required LabDemoController controller,
+  }) {
+    return ValueListenableBuilder<int>(
+      valueListenable: controls.imageResolution,
+      builder: (_, res, _) {
+        if (useFixed) {
+          return ExcessiveImagesFixed(
+            controller: controller,
+            imageResolution: res,
+          );
+        }
+        return ExcessiveImagesBroken(
+          controller: controller,
+          imageResolution: res,
+        );
+      },
+    );
+  }
+}
+
+class _PaintScenario extends LabScenario {
+  _PaintScenario(this.controls);
+  final PerformanceControls controls;
+
+  @override
+  String get id => 'perf-paint';
+  @override
+  String get title => '5. Expensive Layout and Painting';
+  @override
+  String get problemSummary =>
+      'Dense CustomPainter plus Opacity/ClipRRect forces costly compositing '
+      'every animation frame.';
+  @override
+  String get diagnosis =>
+      'Compare paint-call counters and FrameTiming raster averages. In '
+      'DevTools Performance, inspect raster timeline and layer count.';
+  @override
+  String get recommendedFix =>
+      'Simplify painting, selective RepaintBoundary, honest shouldRepaint, '
+      'avoid unjustified saveLayer effects.';
+  @override
+  String get brokenSourcePath =>
+      'lib/features/performance_lab/examples/broken/expensive_paint_broken.dart';
+  @override
+  String get fixedSourcePath =>
+      'lib/features/performance_lab/examples/fixed/expensive_paint_fixed.dart';
+
+  @override
+  Widget buildDemo({
+    required bool useFixed,
+    required LabDemoController controller,
+  }) {
+    controls.frameMonitor.clear();
+    if (useFixed) {
+      return ExpensivePaintFixed(
+        controller: controller,
+        frameMonitor: controls.frameMonitor,
+      );
+    }
+    return ExpensivePaintBroken(
+      controller: controller,
+      frameMonitor: controls.frameMonitor,
+    );
+  }
+}

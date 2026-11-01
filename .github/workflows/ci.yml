@@ -1,0 +1,22 @@
+name: PerfKit CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  analyze-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: flutter analyze
+      # Flaky demos under test/.../flaky are skipped; default suite stays green.
+      - run: flutter test
+      - name: Explicit deterministic testing lab
+        run: flutter test test/features/testing_lab/deterministic
