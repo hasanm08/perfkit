@@ -51,8 +51,10 @@ class _PerformanceLabPageState extends State<PerformanceLabPage> {
       labSubtitle: 'Episode 1 — Why Is Your Flutter App Slow?',
       scenarios: scenarios,
       onScenarioCompleted: widget.progress.markCompleted,
-      toolbarExtras: Row(
-        mainAxisSize: MainAxisSize.min,
+      toolbarExtras: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           const Text(
             'Dataset',
@@ -74,7 +76,6 @@ class _PerformanceLabPageState extends State<PerformanceLabPage> {
               },
             ),
           ),
-          const SizedBox(width: 8),
           const Text(
             'Image',
             style: TextStyle(color: PerfKitColors.secondaryText, fontSize: 12),

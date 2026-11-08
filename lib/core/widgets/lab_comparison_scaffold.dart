@@ -161,9 +161,13 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            spacing: 12,
+            runSpacing: 10,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Expanded(
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 180, maxWidth: 520),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -205,7 +209,10 @@ class _Header extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               ListenableBuilder(
                 listenable: controller,
@@ -222,23 +229,17 @@ class _Header extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(width: 8),
               OutlinedButton.icon(
                 onPressed: controller.reset,
                 icon: const Icon(Icons.refresh, size: 16),
                 label: const Text('Reset'),
               ),
-              const SizedBox(width: 8),
               OutlinedButton.icon(
                 onPressed: onMarkDone,
                 icon: const Icon(Icons.task_alt, size: 16),
                 label: const Text('Mark done'),
               ),
-              if (toolbarExtras != null) ...[
-                const SizedBox(width: 12),
-                toolbarExtras!,
-              ],
-              const Spacer(),
+              ?toolbarExtras,
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
