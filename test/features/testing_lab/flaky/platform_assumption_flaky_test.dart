@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('assumes unix path separator', () {
-    // ❌ Fails on Windows.
+    //! Main issue: assumes Unix path separator — fails on Windows.
     expect(Platform.pathSeparator, '/');
   }, skip: true);
 }

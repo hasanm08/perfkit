@@ -88,35 +88,39 @@ class _CatalogDemoState extends State<CatalogDemo> {
     });
     try {
       if (widget.useFixed) {
-        // Fixed path differs by focus.
         switch (widget.focus) {
           case OfflineFocus.connectivity:
           case OfflineFocus.timeouts:
           case OfflineFocus.cache:
+            //? Main fix: refresh via repository (timeouts + cache fallback).
             await scope.repository.refresh();
           case OfflineFocus.queue:
+            //? Main fix: flush persisted pending ops on reconnect.
             await scope.repository.flushPending();
           case OfflineFocus.sync:
+            //? Main fix: explicit synchronize() with conflict/sync state.
             await scope.repository.synchronize();
         }
       } else {
         switch (widget.focus) {
           case OfflineFocus.connectivity:
-            // ❌ Trusts Wi-Fi flag, not actual backend reachability.
+            //! Main issue: trusts Wi-Fi flag, not actual backend reachability.
             _brokenProducts = await scope.broken.listProducts();
           case OfflineFocus.timeouts:
-            // ❌ No timeout — may hang under slow/serverUnavailable.
+            //! Main issue: no timeout — may hang under slow/serverUnavailable.
             _brokenProducts = await scope.broken.listProducts();
           case OfflineFocus.cache:
+            //! Main issue: no local cache path — requires live network.
             _brokenProducts = await scope.broken.listProducts();
           case OfflineFocus.queue:
             if (_selectedId != null) {
+              //! Main issue: offline favorite is dropped instead of queued.
               await scope.broken.setFavorite(_selectedId!, favorite: true);
             } else {
               _brokenProducts = await scope.broken.listProducts();
             }
           case OfflineFocus.sync:
-            // ❌ Assumes reconnection means synced.
+            //! Main issue: assumes reconnection means data is synchronized.
             if (scope.network.naiveLinkConnected) {
               _error = null;
               _brokenProducts = await scope.broken.listProducts();

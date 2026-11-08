@@ -152,6 +152,7 @@ class _ExcessiveImagesFixedState extends State<ExcessiveImagesFixed> {
                 child: Image.memory(
                   _bytes!,
                   fit: BoxFit.cover,
+                  //? Main fix: decode at display size via cacheWidth/cacheHeight.
                   cacheWidth: cachePx,
                   cacheHeight: cachePx,
                   gaplessPlayback: true,

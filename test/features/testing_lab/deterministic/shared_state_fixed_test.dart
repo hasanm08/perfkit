@@ -4,6 +4,7 @@ import 'package:perfkit/features/testing_lab/examples/fixed/deterministic_helper
 void main() {
   late CounterFixture fixture;
 
+  //? Main fix: fresh fixture per test — no shared mutable globals.
   setUp(() => fixture = CounterFixture());
 
   test('starts at zero', () {

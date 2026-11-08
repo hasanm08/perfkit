@@ -10,9 +10,11 @@
 // SEE FIXED IMPLEMENTATION:
 // lib/features/testing_lab/examples/fixed/deterministic_helpers.dart
 
+//! Main issue: mutable global leaked across tests (order-dependent).
 int sharedGlobalCounter = 0;
 
 String greetWallClock() {
+  //! Main issue: depends on wall-clock DateTime.now() — environment-dependent.
   final hour = DateTime.now().hour;
   if (hour < 12) return 'Good morning';
   if (hour < 18) return 'Good afternoon';

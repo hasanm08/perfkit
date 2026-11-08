@@ -3,6 +3,8 @@
 // as proof of internet access. Captive portals, DNS failures, and 5xx still
 // look "connected".
 //
+//! Main issue: link connectivity ≠ internet / backend reachability.
+//
 // WHY IT IS A PROBLEM:
 // Users see hard failures or hangs despite having a link-layer association.
 //
@@ -16,6 +18,8 @@
 // ❌ OFFLINE PROBLEM (timeouts/retries):
 // NaiveRetry / runWithoutTimeout allow requests to hang and retry forever.
 //
+//! Main issue: unbounded immediate retries with no timeouts.
+//
 // WHY IT IS A PROBLEM:
 // UI freezes waiting; batteries and thread pools waste work; thundering herds.
 //
@@ -27,6 +31,8 @@
 
 // ❌ OFFLINE PROBLEM (cache):
 // Every screen requires a live network response — no local cache.
+//
+//! Main issue: no offline-readable cache for previously loaded content.
 //
 // WHY IT IS A PROBLEM:
 // The app is unusable offline even for previously loaded content.
@@ -40,6 +46,8 @@
 // ❌ OFFLINE PROBLEM (queue):
 // Favorite toggles throw away user intent when offline.
 //
+//! Main issue: offline user edits are dropped instead of queued.
+//
 // WHY IT IS A PROBLEM:
 // Silent data loss destroys trust.
 //
@@ -51,6 +59,8 @@
 
 // ❌ OFFLINE PROBLEM (sync):
 // Assuming "online" means local changes are synchronized.
+//
+//! Main issue: "online" is treated as proof that local changes are synced.
 //
 // WHY IT IS A PROBLEM:
 // Conflicts and dropped ops go unnoticed.

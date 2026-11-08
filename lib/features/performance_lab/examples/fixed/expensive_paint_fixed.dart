@@ -112,6 +112,7 @@ class _ExpensivePaintFixedState extends State<ExpensivePaintFixed>
           ),
         ),
         Expanded(
+          //? Main fix: RepaintBoundary + no Opacity/ClipRRect saveLayer.
           child: RepaintBoundary(
             child: AnimatedBuilder(
               animation: _anim,
@@ -152,6 +153,7 @@ class _LightPainter extends CustomPainter {
       ..color = const Color(0xFF14B8A6);
     final cx = size.width / 2;
     final cy = size.height / 2;
+    //? Main fix: far fewer primitives, no blur maskFilter.
     for (var i = 0; i < 24; i++) {
       final r = 20.0 + i * 12 + 8 * sin(t * pi * 2 + i / 3);
       canvas.drawCircle(Offset(cx, cy), r, paint);
@@ -159,5 +161,6 @@ class _LightPainter extends CustomPainter {
   }
 
   @override
+  //? Main fix: repaint only when animation value changes.
   bool shouldRepaint(covariant _LightPainter oldDelegate) => oldDelegate.t != t;
 }

@@ -48,7 +48,7 @@ class _UndisposedControllersBrokenState
       final host = _LeakyHost();
       host.start();
       _hosts.add(host);
-      // "Close" without disposing — intentional leak.
+      //! Main issue: "close" without dispose/cancel — intentional leak.
     }
     _publish();
     setState(() {});
@@ -78,7 +78,7 @@ class _UndisposedControllersBrokenState
   @override
   void dispose() {
     widget.controller.removeListener(_onController);
-    // Intentionally do NOT dispose hosts — demonstrates the bug.
+    //! Main issue: hosts (controllers/subscriptions) never disposed here.
     super.dispose();
   }
 
@@ -108,9 +108,11 @@ class _LeakyHost {
   String lastValue = '';
 
   void start() {
+    //! Main issue: TextEditingController created with no matching dispose.
     text = TextEditingController(text: 'leak');
     lifecycleCounters.recordControllerCreated();
     stream = StreamController.broadcast();
+    //! Main issue: StreamSubscription created with no matching cancel.
     sub = stream.stream.listen((v) => lastValue = v);
     lifecycleCounters.recordSubscriptionCreated();
     stream.add('tick-${DateTime.now().millisecondsSinceEpoch}');

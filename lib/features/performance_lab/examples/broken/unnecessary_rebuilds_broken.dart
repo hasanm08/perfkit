@@ -54,6 +54,7 @@ class _UnnecessaryRebuildsBrokenState extends State<UnnecessaryRebuildsBroken> {
   void _onController() {
     if (widget.controller.isRunning) {
       _timer ??= Timer.periodic(const Duration(milliseconds: 100), (_) {
+        //! Main issue: parent setState rebuilds the entire tree every tick.
         setState(() => _ticks++);
         _publish();
       });
@@ -100,6 +101,7 @@ class _UnnecessaryRebuildsBrokenState extends State<UnnecessaryRebuildsBroken> {
         children: [
           _TickerLabel(ticks: _ticks, counter: widget.rebuildCounter),
           const SizedBox(height: 12),
+          //! Main issue: heavy sibling rebuilds even though it ignores `_ticks`.
           Expanded(child: _HeavyStaticPanel(counter: widget.rebuildCounter)),
         ],
       ),

@@ -59,6 +59,7 @@ class ProductRepository extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
+    //? Main fix: real backend calls go through RetryPolicy (timeouts/backoff).
     final list = await policy.execute(
       network,
       'GET /products',
@@ -94,6 +95,7 @@ class ProductRepository extends ChangeNotifier {
   }
 
   Future<void> setFavorite(String productId, {required bool favorite}) async {
+    //? Main fix: enqueue with idempotency key; never drop offline intent.
     final op = PendingFavoriteOp(
       id: 'op-${DateTime.now().microsecondsSinceEpoch}-$productId',
       productId: productId,
@@ -138,6 +140,7 @@ class ProductRepository extends ChangeNotifier {
   }
 
   Future<void> synchronize() async {
+    //? Main fix: explicit sync — online alone does not mean synchronized.
     syncState = SyncState.syncing;
     notifyListeners();
     try {
@@ -148,6 +151,7 @@ class ProductRepository extends ChangeNotifier {
         () => backend.syncFavorites(_favorites, _localRevision),
       );
       if (result.conflict) {
+        //? Main fix: surface conflict state instead of silently overwriting.
         _favorites = {...result.favorites};
         _localRevision = result.revision;
         syncState = SyncState.conflict;
@@ -209,6 +213,7 @@ class ProductRepository extends ChangeNotifier {
         _cacheAt = data['at'] != null
             ? DateTime.tryParse(data['at'] as String)
             : null;
+        //? Main fix: restore cache offline and mark it stale for the UI.
         stale = true;
       }
     } catch (_) {}
@@ -225,9 +230,11 @@ class BrokenProductRepository {
   final NetworkSimulator network;
 
   Future<List<Product>> listProducts() async {
+    //! Main issue: trusts Wi-Fi/link flag as proof of internet access.
     if (!network.naiveLinkConnected) {
       throw SimulatedNetworkException('No Wi-Fi — giving up');
     }
+    //! Main issue: no timeout/cache — every screen requires a live response.
     return network.runWithoutTimeout(
       'GET /products (broken)',
       backend.listProducts,
@@ -235,6 +242,7 @@ class BrokenProductRepository {
   }
 
   Future<void> setFavorite(String id, {required bool favorite}) async {
+    //! Main issue: offline favorite intent is thrown away.
     if (!network.naiveLinkConnected) {
       throw SimulatedNetworkException('Offline — favorite lost');
     }

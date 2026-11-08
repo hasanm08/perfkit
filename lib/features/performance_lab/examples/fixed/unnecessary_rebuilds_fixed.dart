@@ -35,6 +35,7 @@ class UnnecessaryRebuildsFixed extends StatefulWidget {
 }
 
 class _UnnecessaryRebuildsFixedState extends State<UnnecessaryRebuildsFixed> {
+  //? Main fix: ticking state lives in a ValueNotifier, not parent setState.
   final ValueNotifier<int> _ticks = ValueNotifier(0);
   Timer? _timer;
 
@@ -93,6 +94,7 @@ class _UnnecessaryRebuildsFixedState extends State<UnnecessaryRebuildsFixed> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          //? Main fix: only the ticker label rebuilds via ValueListenableBuilder.
           ValueListenableBuilder<int>(
             valueListenable: _ticks,
             builder: (context, value, _) {

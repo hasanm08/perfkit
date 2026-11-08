@@ -43,7 +43,8 @@ class _UndisposedControllersFixedState
     for (var i = 0; i < 5; i++) {
       final host = _SafeHost()..start();
       _hosts.add(host);
-      host.dispose(); // Proper close.
+      //? Main fix: dispose the host on close (controllers + subscriptions).
+      host.dispose();
       _hosts.remove(host);
     }
     _publish();
@@ -125,6 +126,7 @@ class _SafeHost {
   }
 
   void dispose() {
+    //? Main fix: cancel subscription, close stream, dispose controller.
     sub?.cancel();
     lifecycleCounters.recordSubscriptionCancelled();
     stream.close();

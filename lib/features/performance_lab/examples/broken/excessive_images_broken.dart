@@ -139,7 +139,7 @@ class _ExcessiveImagesBrokenState extends State<ExcessiveImagesBroken> {
                 child: Image.memory(
                   _bytes!,
                   fit: BoxFit.cover,
-                  // Intentionally omit cacheWidth/cacheHeight.
+                  //! Main issue: full-res decode into tiny tiles (no cacheWidth).
                   gaplessPlayback: true,
                 ),
               );

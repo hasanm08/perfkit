@@ -85,6 +85,7 @@ class _LinkTesterPanelState extends State<LinkTesterPanel> {
       case DeepLinkFocus.coldWarm:
         final uri = Uri.parse(raw.startsWith('/') ? 'perfkit://app$raw' : raw);
         if (widget.useFixed) {
+          //? Main fix: handle cold + warm via ingestFixed + consumeInitial.
           widget.handler.ingestFixed(uri, coldStart: _coldStart);
           final path = uri.path.isEmpty ? raw : uri.path;
           if (_coldStart) {
@@ -96,6 +97,7 @@ class _LinkTesterPanelState extends State<LinkTesterPanel> {
             context.go(_pathFromUri(uri, fallback: path));
           }
         } else {
+          //! Main issue: warm-only ingest — cold-start links never navigate.
           widget.handler.ingestBroken(uri, coldStart: _coldStart);
           if (!_coldStart && context.mounted) {
             context.go(_pathFromUri(uri, fallback: raw));
@@ -105,6 +107,7 @@ class _LinkTesterPanelState extends State<LinkTesterPanel> {
         final dest = raw.startsWith('/') ? raw : '/deep-link/app/orders/o1';
         if (widget.useFixed) {
           if (!widget.auth.isAuthenticated) {
+            //? Main fix: auth gate + remember intended destination.
             widget.auth.rememberIntended(dest);
             widget.log.add('FIXED: redirecting to login; saved $dest');
             if (context.mounted) context.go('/deep-link/login');
@@ -113,17 +116,18 @@ class _LinkTesterPanelState extends State<LinkTesterPanel> {
             if (context.mounted) context.go(dest);
           }
         } else {
-          // ❌ Navigate to protected route before auth resolves.
+          //! Main issue: navigates to protected route before auth resolves.
           widget.log.add('BROKEN: pushing protected $dest without auth gate');
           if (context.mounted) context.go(dest);
         }
       case DeepLinkFocus.nested:
         final dest = raw.startsWith('/') ? raw : '/deep-link/app/products/p7';
         if (widget.useFixed) {
+          //? Main fix: nested go respects shell/tab route hierarchy.
           widget.log.add('FIXED: nested go → $dest');
           if (context.mounted) context.go(dest);
         } else {
-          // ❌ Flat push that ignores tab shell structure (simulated via query).
+          //! Main issue: flat push ignores nested tab shell structure.
           widget.log.add('BROKEN: flat push ignoring nested shell → $dest');
           if (context.mounted) {
             context.push(
@@ -137,6 +141,7 @@ class _LinkTesterPanelState extends State<LinkTesterPanel> {
             : raw;
         if (widget.useFixed) {
           if (!_validProductPath(dest) && !_validOrderPath(dest)) {
+            //? Main fix: validate params and route to a fallback error page.
             widget.log.add('FIXED: invalid route → error page');
             if (context.mounted) {
               context.go(
@@ -147,7 +152,7 @@ class _LinkTesterPanelState extends State<LinkTesterPanel> {
             context.go(dest);
           }
         } else {
-          // ❌ Navigate blindly — may show blank/crash-like error UI.
+          //! Main issue: navigates blindly — blank/crash-like UI on bad URLs.
           widget.log.add('BROKEN: blind navigate to $dest');
           if (context.mounted) context.go(dest);
         }

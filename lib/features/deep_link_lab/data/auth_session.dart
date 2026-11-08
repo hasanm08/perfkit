@@ -32,11 +32,13 @@ class AuthSession extends ChangeNotifier {
     notifyListeners();
   }
 
+  //? Main fix: preserve intended destination across login redirect.
   void rememberIntended(String location) {
     _intended = location;
     notifyListeners();
   }
 
+  //? Main fix: resume navigation to intended destination after sign-in.
   String? takeIntended() {
     final v = _intended;
     _intended = null;

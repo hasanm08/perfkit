@@ -41,7 +41,7 @@ class _SurvivingTimersBrokenState extends State<SurvivingTimersBroken> {
 
   void _onController() {
     if (!widget.controller.isRunning) return;
-    // Simulate open screen → start timer → pop without cancel.
+    //! Main issue: timer started on "open" and never cancelled on "close".
     final timer = Timer.periodic(const Duration(milliseconds: 200), (_) {});
     lifecycleCounters.recordTimerCreated();
     _orphans.add(timer);
@@ -68,7 +68,7 @@ class _SurvivingTimersBrokenState extends State<SurvivingTimersBroken> {
   @override
   void dispose() {
     widget.controller.removeListener(_onController);
-    // Intentionally leave orphan timers running.
+    //! Main issue: dispose leaves orphan timers running (retains callbacks).
     super.dispose();
   }
 

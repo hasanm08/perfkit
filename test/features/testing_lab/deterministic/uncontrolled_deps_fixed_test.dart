@@ -3,6 +3,7 @@ import 'package:perfkit/features/testing_lab/examples/fixed/deterministic_helper
 
 void main() {
   test('greeting uses injected clock', () {
+    //? Main fix: FixedClock makes greeting assertions deterministic.
     expect(greet(FixedClock(DateTime(2026, 1, 1, 9))), 'Good morning');
     expect(greet(FixedClock(DateTime(2026, 1, 1, 15))), 'Good afternoon');
   });

@@ -77,7 +77,9 @@ class _ExpensiveBuildFixedState extends State<ExpensiveBuildFixed> {
     setState(() => _busy = true);
     final sw = Stopwatch()..start();
     final size = widget.datasetSize;
+    //? Main fix: compute when inputs change — not inside every build().
     final result = size > 8000
+        //? Main fix: offload large workloads via compute()/isolate.
         ? await compute(_heavyCompute, size)
         : _heavyCompute(size);
     sw.stop();
@@ -110,6 +112,7 @@ class _ExpensiveBuildFixedState extends State<ExpensiveBuildFixed> {
 
   @override
   Widget build(BuildContext context) {
+    //? Main fix: build() only paints cached `_rows`.
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(

@@ -25,7 +25,9 @@ class ObjectLifecycleFixed extends StatefulWidget {
 
 class _ObjectLifecycleFixedState extends State<ObjectLifecycleFixed> {
   final List<Uint8Blob> _scoped = [];
-
+  //or Uint8List for upload image
+  // Uint8Blob(i) is a class that represents a blob of data
+  // Uint8List is a list of bytes
   @override
   void initState() {
     super.initState();
@@ -34,11 +36,12 @@ class _ObjectLifecycleFixedState extends State<ObjectLifecycleFixed> {
 
   void _onController() {
     if (!widget.controller.isRunning) return;
+    //? Main fix: own blobs in screen scope — not a permanent singleton.
     _scoped
       ..clear()
       ..addAll(List.generate(10, (i) => Uint8Blob(i)));
-    // Release when "done".
     final count = _scoped.length;
+    //? Main fix: clear references when done so GC can reclaim.
     _scoped.clear();
     lifecycleCounters.setRetainedObjects(0);
     widget.controller.setMetrics([

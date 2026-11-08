@@ -37,6 +37,7 @@ class _SurvivingTimersFixedState extends State<SurvivingTimersFixed> {
     if (!widget.controller.isRunning) return;
     final timer = Timer.periodic(const Duration(milliseconds: 200), (_) {});
     lifecycleCounters.recordTimerCreated();
+    //? Main fix: cancel the timer when the simulated screen closes.
     timer.cancel();
     lifecycleCounters.recordTimerCancelled();
     _cycles++;

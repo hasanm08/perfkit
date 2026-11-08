@@ -6,6 +6,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(home: Scaffold(body: Text('Ready'))),
     );
+    //? Main fix: explicit pump + assert user-visible state (no pumpAndSettle).
     await tester.pump();
     expect(find.text('Ready'), findsOneWidget);
   });

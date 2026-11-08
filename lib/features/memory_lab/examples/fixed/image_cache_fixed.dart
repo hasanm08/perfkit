@@ -32,7 +32,7 @@ class _ImageCacheFixedState extends State<ImageCacheFixed> {
   void initState() {
     super.initState();
     widget.controller.addListener(_onController);
-    // Restore sensible defaults.
+    //? Main fix: keep ImageCache limits at sensible defaults.
     final cache = PaintingBinding.instance.imageCache;
     cache.maximumSize = 100;
     cache.maximumSizeBytes = 100 << 20;
@@ -66,6 +66,7 @@ class _ImageCacheFixedState extends State<ImageCacheFixed> {
   @override
   void dispose() {
     widget.controller.removeListener(_onController);
+    //? Main fix: drop strong refs when leaving the screen.
     _shared = null;
     super.dispose();
   }
@@ -109,6 +110,7 @@ class _ImageCacheFixedState extends State<ImageCacheFixed> {
                   itemBuilder: (_, i) => Image.memory(
                     _shared!,
                     fit: BoxFit.cover,
+                    //? Main fix: decode thumbnails via cacheWidth/cacheHeight.
                     cacheWidth: cachePx,
                     cacheHeight: cachePx,
                   ),

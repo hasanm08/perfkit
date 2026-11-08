@@ -21,6 +21,7 @@ import '../../../../core/widgets/lab_demo_controller.dart';
 
 class LeakyObjectRegistry {
   LeakyObjectRegistry._();
+  //! Main issue: permanent singleton root keeps objects reachable forever.
   static final instance = LeakyObjectRegistry._();
   final List<Uint8Blob> retained = [];
 }
@@ -49,6 +50,7 @@ class _ObjectLifecycleBrokenState extends State<ObjectLifecycleBroken> {
   void _onController() {
     if (!widget.controller.isRunning) return;
     for (var i = 0; i < 10; i++) {
+      //! Main issue: blobs are added to a singleton and never released.
       LeakyObjectRegistry.instance.retained.add(
         Uint8Blob(LeakyObjectRegistry.instance.retained.length),
       );

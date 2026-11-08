@@ -44,15 +44,16 @@ class _ClosureRetainBrokenState extends State<ClosureRetainBroken> {
   void _onController() {
     if (!widget.controller.isRunning) return;
     _graph = List.generate(40, (i) => Uint8Blob(i));
-    // Closure captures `_graph` (and effectively this State pattern).
+    //! Main issue: long-lived static list keeps closures forever.
     closureRetainLingering.add(() {
+      //! Main issue: closure captures `_graph` (large object graph).
       final n = _graph?.length ?? 0;
       // Touch the graph so the capture is "used".
       if (n > 0) {
         assert(_graph!.first.bytes.isNotEmpty);
       }
     });
-    // Drop the field — but the closure still retains the list.
+    //! Main issue: nulling the field does not free the graph — closures still retain it.
     _graph = null;
     lifecycleCounters.setRetainedObjects(closureRetainLingering.length * 40);
     widget.controller.setMetrics([

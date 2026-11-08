@@ -36,11 +36,12 @@ class _ClosureRetainFixedState extends State<ClosureRetainFixed> {
   void _onController() {
     if (!widget.controller.isRunning) return;
     final graph = List.generate(40, (i) => Uint8Blob(i));
-    final count = graph.length; // capture primitive only
+    //? Main fix: capture a primitive only — not the large graph.
+    final count = graph.length;
     _local.add(() {
       assert(count == 40);
     });
-    // Release graph + callbacks.
+    //? Main fix: clear callbacks so nothing permanently retains the graph.
     _local.clear();
     lifecycleCounters.setRetainedObjects(0);
     widget.controller.setMetrics([

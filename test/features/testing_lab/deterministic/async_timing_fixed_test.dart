@@ -6,6 +6,7 @@ void main() {
   test('deterministic async awaits completer', () async {
     final done = Completer<void>();
     Future.microtask(done.complete);
+    //? Main fix: await explicit completion instead of a timed delay.
     await done.future;
     expect(done.isCompleted, isTrue);
   });

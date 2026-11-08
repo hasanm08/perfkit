@@ -22,12 +22,15 @@ class RetryPolicy {
   ) async {
     final rng = Random();
     Object? lastError;
+    //? Main fix: bounded attempts + timeout on each try.
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         return await net.run(label, action, timeout: timeout);
       } on SimulatedNetworkException catch (e) {
         lastError = e;
+        //? Main fix: do not retry permanent errors; stop at maxAttempts.
         if (e.permanent || attempt == maxAttempts) rethrow;
+        //? Main fix: exponential backoff with jitter.
         final backoff = baseDelay * (1 << (attempt - 1));
         final jitter = Duration(milliseconds: rng.nextInt(100));
         await Future<void>.delayed(backoff + jitter);
@@ -44,7 +47,7 @@ class NaiveRetry {
     String label,
     Future<T> Function() action,
   ) async {
-    // No timeout, immediate retry loop — intentionally bad.
+    //! Main issue: infinite immediate retries with no timeout.
     while (true) {
       try {
         return await net.runWithoutTimeout(label, action);

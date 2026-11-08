@@ -63,7 +63,7 @@ class _ExpensiveBuildBrokenState extends State<ExpensiveBuildBroken> {
       size,
       (i) => _Item(id: i, score: rng.nextDouble() * 1000, label: 'Item $i'),
     );
-    // Intentionally expensive: repeated sorts + filter.
+    //! Main issue: heavy sort/filter work runs synchronously on the UI isolate.
     for (var pass = 0; pass < 3; pass++) {
       items.sort((a, b) => b.score.compareTo(a.score));
     }
@@ -91,6 +91,7 @@ class _ExpensiveBuildBrokenState extends State<ExpensiveBuildBroken> {
 
   @override
   Widget build(BuildContext context) {
+    //! Main issue: expensive compute runs inside build() on every rebuild.
     final rows = _computeExpensive(widget.datasetSize);
     return Padding(
       padding: const EdgeInsets.all(16),

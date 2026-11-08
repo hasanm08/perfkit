@@ -41,7 +41,7 @@ class _ImageCacheBrokenState extends State<ImageCacheBroken> {
 
   Future<void> _onController() async {
     if (!widget.controller.isRunning) return;
-    // Raise cache ceiling aggressively.
+    //! Main issue: ImageCache limits raised unboundedly.
     final cache = PaintingBinding.instance.imageCache;
     cache.maximumSize = 1000;
     cache.maximumSizeBytes = 200 << 20;
@@ -52,6 +52,7 @@ class _ImageCacheBrokenState extends State<ImageCacheBroken> {
         height: 800,
         seed: i + _retained.length,
       );
+      //! Main issue: strong refs keep full-size PNG buffers forever.
       _retained.add(bytes);
     }
     if (!mounted) return;

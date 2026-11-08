@@ -61,7 +61,7 @@ class _PoorListsBrokenState extends State<PoorListsBroken> {
   @override
   Widget build(BuildContext context) {
     final sw = Stopwatch()..start();
-    // Eagerly construct ALL children.
+    //! Main issue: eagerly construct ALL item widgets up front.
     final children = List<Widget>.generate(widget.datasetSize, (i) {
       // Extra work per item to make the problem observable.
       final label = 'Row $i • ${i.toRadixString(16).padLeft(4, '0')}';
@@ -128,6 +128,7 @@ class _PoorListsBrokenState extends State<PoorListsBroken> {
           ),
         ),
         Expanded(
+          //! Main issue: Column in SingleChildScrollView lays out every child.
           child: SingleChildScrollView(
             controller: _scroll,
             child: Column(children: children),

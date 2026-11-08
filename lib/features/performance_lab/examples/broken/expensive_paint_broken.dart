@@ -119,6 +119,7 @@ class _ExpensivePaintBrokenState extends State<ExpensivePaintBroken>
           ),
         ),
         Expanded(
+          //! Main issue: Opacity + ClipRRect force expensive saveLayer compositing.
           child: Opacity(
             opacity: 0.92,
             child: ClipRRect(
@@ -154,6 +155,7 @@ class _HeavyPainter extends CustomPainter {
     onPaint();
     final paint = Paint()..style = PaintingStyle.stroke;
     final rng = Random(0);
+    //! Main issue: dense geometry + blur maskFilter every frame.
     for (var i = 0; i < 400; i++) {
       paint
         ..color = Color.fromARGB(
@@ -172,5 +174,6 @@ class _HeavyPainter extends CustomPainter {
   }
 
   @override
+  //! Main issue: shouldRepaint always true — repaints even when `t` is unchanged.
   bool shouldRepaint(covariant _HeavyPainter oldDelegate) => true;
 }

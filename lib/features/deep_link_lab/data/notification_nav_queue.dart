@@ -37,6 +37,7 @@ class NotificationNavQueue extends ChangeNotifier {
   //
   // SEE FIXED IMPLEMENTATION: ingestFixed
   String? ingestBroken(String location) {
+    //! Main issue: navigates immediately — ignores lifecycle and auth.
     log.add(
       'BROKEN: immediate navigate to $location (phase=${phase.name}, auth=${auth.status.name})',
     );
@@ -55,6 +56,7 @@ class NotificationNavQueue extends ChangeNotifier {
   // PRODUCTION NOTE:
   // Wire FCM/APNs click handlers into this queue rather than calling go() directly.
   void ingestFixed(String location, {required bool requiresAuth}) {
+    //? Main fix: queue intent until foreground + auth allow navigation.
     _pending = location;
     log.add('FIXED: queued notification intent $location');
     notifyListeners();
@@ -64,15 +66,18 @@ class NotificationNavQueue extends ChangeNotifier {
   String? flush({bool requiresAuth = true}) {
     if (_pending == null) return null;
     if (phase != AppLifecyclePhase.foreground) {
+      //? Main fix: wait for foreground before navigating.
       log.add('FIXED: waiting for foreground (phase=${phase.name})');
       return null;
     }
     if (requiresAuth && !auth.isAuthenticated) {
+      //? Main fix: preserve destination until auth succeeds.
       auth.rememberIntended(_pending!);
       log.add('FIXED: waiting for auth; preserved $_pending');
       return null;
     }
     if (lastNavigated == _pending) {
+      //? Main fix: prevent duplicate notification navigation.
       log.add('FIXED: prevented duplicate navigation to $_pending');
       _pending = null;
       notifyListeners();

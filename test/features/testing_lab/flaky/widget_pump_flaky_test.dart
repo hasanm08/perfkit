@@ -6,7 +6,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(home: Scaffold(body: _ForeverSpinner())),
     );
-    // ❌ pumpAndSettle never completes with repeating animation.
+    //! Main issue: pumpAndSettle never completes with a repeating animation.
     await tester.pumpAndSettle();
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   }, skip: true);

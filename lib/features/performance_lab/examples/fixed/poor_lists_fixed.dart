@@ -85,13 +85,16 @@ class _PoorListsFixedState extends State<PoorListsFixed> {
           ),
         ),
         Expanded(
+          //? Main fix: ListView.builder builds only visible (+ cache) items.
           child: ListView.builder(
             itemCount: widget.datasetSize,
+            //? Main fix: itemExtent enables cheaper fixed-extent layout.
             itemExtent: 64,
             itemBuilder: (context, i) {
               _built++;
               final label = 'Row $i • ${i.toRadixString(16).padLeft(4, '0')}';
               return Container(
+                //? Main fix: stable keys preserve identity across rebuilds.
                 key: ValueKey(i),
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 padding: const EdgeInsets.symmetric(horizontal: 12),

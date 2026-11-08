@@ -3,6 +3,7 @@ import 'package:perfkit/features/testing_lab/examples/fixed/deterministic_helper
 
 void main() {
   test('path separator via injected platform', () {
+    //? Main fix: inject platform bridge; do not read dart:io in unit tests.
     expect(PathPlatform('/').pathSeparator, '/');
     expect(PathPlatform(r'\').pathSeparator, r'\');
   });

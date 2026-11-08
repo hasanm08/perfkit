@@ -44,6 +44,7 @@ class DeepLinkHandler extends ChangeNotifier {
   // SEE FIXED IMPLEMENTATION: ingestFixed
   void ingestBroken(Uri uri, {required bool coldStart}) {
     if (coldStart) {
+      //! Main issue: cold-start initial links are ignored.
       log.add('BROKEN: ignored cold-start link $uri');
       return;
     }
@@ -62,9 +63,11 @@ class DeepLinkHandler extends ChangeNotifier {
   // On device, wire uni_links/app_links (or OS APIs) into this handler.
   void ingestFixed(Uri uri, {required bool coldStart}) {
     if (coldStart) {
+      //? Main fix: store cold-start initialLink for later navigation.
       setInitialLink(uri);
     }
     if (_lastProcessed == uri) {
+      //? Main fix: dedupe so the same link is not processed twice.
       log.add('FIXED: deduped duplicate $uri');
       return;
     }
