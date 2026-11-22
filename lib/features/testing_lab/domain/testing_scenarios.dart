@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../core/models/lab_scenario.dart';
